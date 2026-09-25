@@ -1,0 +1,13 @@
+target,service_name,owner,criticality
+valid.lab.local:8443,Портал,ivanov@lab.local,medium
+expiring.lab.local:8443,Почта OWA,petrov@lab.local,high
+warning.lab.local:8443,VPN,,high
+info.lab.local:8443,Wiki,sidorov@lab.local,low
+expired.lab.local:8443,CRM,,high
+selfsigned.lab.local:8443,Jenkins,ops@lab.local,medium
+chain.lab.local:8443,HR-портал,hr@lab.local,medium
+mismatch.lab.local:8443,API Gateway,api@lab.local,high
+weak.lab.local:8443,Legacy App,,low
+dead.lab.local:8499,Old Service,,low
+valid.lab.local:8443,Портал,ivanov@lab.local,medium
+not a host!!,Некорректная цель,,medium

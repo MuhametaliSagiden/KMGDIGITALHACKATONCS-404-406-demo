@@ -2,7 +2,7 @@
 
 ## Готовая демонстрация на Azure VM
 
-В этом репозитории находятся два проекта: основной Identity Risk Analyzer и второй проект Certificate Radar в папке `hackatonProject2` (Git submodule). Чтобы скачать оба проекта на новый компьютер, используйте `git clone --recurse-submodules https://github.com/MuhametaliSagiden/KMGDIGITALHACKATONCS-404-406-demo.git`. Если основной репозиторий уже скачан, выполните `git submodule update --init --recursive` в его папке.
+В этом репозитории находятся оба проекта: основной Identity Risk Analyzer и Certificate Radar в папке `hackatonProject2`. Чтобы скачать оба проекта на новый компьютер, используйте `git clone https://github.com/MuhametaliSagiden/KMGDIGITALHACKATONCS-404-406-demo.git`.
 
 Для показа жюри на подготовленной Azure VM откройте [инструкцию для демонстрации](DEMO-ЖЮРИ-НАЧНИ-ЗДЕСЬ.md). Там есть запуск одной командой, адреса обеих страниц и пошаговый сценарий.
 
