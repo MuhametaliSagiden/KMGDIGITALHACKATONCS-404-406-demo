@@ -1,11 +1,11 @@
 @model IdentityRiskAnalyzer.Web.ViewModels.HistoricalMembershipViewModel
 @if (!Model.PathAvailable)
 {
-    <span class="text-warning">Path data could not be parsed.</span>
+    <span class="text-warning">Не удалось разобрать данные о цепочке членства.</span>
 }
 else if (Model.PathDisplayNames.Count == 0)
 {
-    <span class="text-muted">No path data was saved.</span>
+    <span class="text-muted">Данные о цепочке не сохранены.</span>
 }
 else
 {

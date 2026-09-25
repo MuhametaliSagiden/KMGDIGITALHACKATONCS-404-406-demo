@@ -1,33 +1,33 @@
 @model IdentityRiskAnalyzer.Web.ViewModels.AdGroupListViewModel
 @{
-    ViewData["Title"] = "Active Directory groups";
+    ViewData["Title"] = "Группы Active Directory";
 }
 
-<h1>Active Directory groups</h1>
-<p class="text-muted">Directory data is read from Active Directory and kept in memory for this request. Only direct members are listed.</p>
+<h1>Группы Active Directory</h1>
+<p class="text-muted">Данные загружаются из Active Directory и хранятся в памяти только на время этого запроса. Показаны только непосредственные участники групп.</p>
 
 @if (Model.ErrorMessage is not null)
 {
-    <div class="alert alert-danger" role="alert">@Model.ErrorMessage</div>
+    <div class="alert alert-danger" role="alert">@UiText.Message(Model.ErrorMessage)</div>
 }
 else if (Model.IncompleteMemberLists > 0)
 {
     <div class="alert alert-warning" role="status">
-        Member retrieval was incomplete for @Model.IncompleteMemberLists group(s). Counts for those groups may be partial.
+        Для @Model.IncompleteMemberLists групп список участников загружен не полностью; число участников может быть неполным.
     </div>
 }
 
 @if (Model.ErrorMessage is null && Model.TotalCount == 0)
 {
-    <div class="alert alert-info" role="status">No group entries were returned.</div>
+    <div class="alert alert-info" role="status">Каталог не вернул группы.</div>
 }
 else if (Model.ErrorMessage is null)
 {
     <p>
-        Showing @Model.Groups.Count of @Model.TotalCount groups.
+        Показано групп: @Model.Groups.Count из @Model.TotalCount.
         @if (Model.IsLimited)
         {
-            <span>The display is limited to the first @Model.DisplayLimit results.</span>
+            <span>Показаны первые @Model.DisplayLimit результатов.</span>
         }
     </p>
 
@@ -35,13 +35,13 @@ else if (Model.ErrorMessage is null)
         <table class="table table-striped table-sm align-middle">
             <thead>
                 <tr>
-                    <th scope="col">Group</th>
-                    <th scope="col">SAM Account Name</th>
+                    <th scope="col">Группа</th>
+                    <th scope="col">Имя SAM</th>
                     <th scope="col">SID</th>
-                    <th scope="col">Type</th>
-                    <th scope="col">Direct Members</th>
-                    <th scope="col">Managed By</th>
-                    <th scope="col">Distinguished Name</th>
+                    <th scope="col">Тип</th>
+                    <th scope="col">Непосредственные участники</th>
+                    <th scope="col">Управляется</th>
+                    <th scope="col">Различающееся имя (DN)</th>
                 </tr>
             </thead>
             <tbody>
@@ -51,12 +51,12 @@ else if (Model.ErrorMessage is null)
                         <td>@group.Name</td>
                         <td>@group.SamAccountName</td>
                         <td>@group.Sid</td>
-                        <td>@group.GroupTypeDisplay</td>
+                        <td>@UiText.GroupType(group.GroupTypeDisplay)</td>
                         <td>
                             @group.MembersCount
                             @if (!group.MembersComplete)
                             {
-                                <span class="badge text-bg-warning">Partial</span>
+                                <span class="badge text-bg-warning">Частично</span>
                             }
                         </td>
                         <td>@group.ManagedBy</td>
@@ -68,4 +68,4 @@ else if (Model.ErrorMessage is null)
     </div>
 }
 
-<p><a asp-action="Index">Back to Active Directory settings</a></p>
+<p><a asp-action="Index">Назад к настройкам Active Directory</a></p>

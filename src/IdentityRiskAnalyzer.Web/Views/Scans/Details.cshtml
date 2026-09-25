@@ -1,64 +1,64 @@
 @using IdentityRiskAnalyzer.Web.Domain.Enums
 @model IdentityRiskAnalyzer.Web.ViewModels.ScanDetailsViewModel
 @{
-    ViewData["Title"] = $"Scan {Model.Summary.Id}";
+    ViewData["Title"] = $"Сканирование №{Model.Summary.Id}";
 }
 
-<h1>Scan @Model.Summary.Id</h1>
-<p><a asp-controller="Scans" asp-action="Index">Back to scans</a></p>
+<h1>Сканирование №@Model.Summary.Id</h1>
+<p><a asp-controller="Scans" asp-action="Index">Назад к списку сканирований</a></p>
 @if (Model.Summary.Status is ScanStatus.Completed or ScanStatus.CompletedWithErrors)
 {
     <div class="d-flex flex-wrap gap-2 mb-3">
-        <a class="btn btn-outline-primary" asp-controller="ScanExports" asp-action="Accounts" asp-route-scanId="@Model.Summary.Id">Export Accounts CSV</a>
-        <a class="btn btn-outline-primary" asp-controller="ScanExports" asp-action="Findings" asp-route-scanId="@Model.Summary.Id">Export Findings CSV</a>
+        <a class="btn btn-outline-primary" asp-controller="ScanExports" asp-action="Accounts" asp-route-scanId="@Model.Summary.Id">Экспорт учётных записей (CSV)</a>
+        <a class="btn btn-outline-primary" asp-controller="ScanExports" asp-action="Findings" asp-route-scanId="@Model.Summary.Id">Экспорт находок (CSV)</a>
     </div>
 }
 @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
 {
-    <div class="alert alert-danger" role="alert">@Model.ErrorMessage</div>
+    <div class="alert alert-danger" role="alert">@UiText.Message(Model.ErrorMessage)</div>
 }
 <dl class="row">
-    <dt class="col-sm-3">Status</dt><dd class="col-sm-9">@Model.Summary.Status</dd>
-    <dt class="col-sm-3">Started (UTC)</dt><dd class="col-sm-9">@Model.Summary.StartedAtUtc.ToString("u")</dd>
-    <dt class="col-sm-3">Finished (UTC)</dt><dd class="col-sm-9">@(Model.Summary.FinishedAtUtc?.ToString("u") ?? "—")</dd>
-    <dt class="col-sm-3">Duration</dt><dd class="col-sm-9">@(Model.Summary.Duration?.ToString(@"hh\:mm\:ss") ?? "—")</dd>
-    <dt class="col-sm-3">Server</dt><dd class="col-sm-9">@Model.Summary.Server</dd>
-    <dt class="col-sm-3">Base DN</dt><dd class="col-sm-9">@Model.BaseDn</dd>
-    <dt class="col-sm-3">Objects scanned</dt><dd class="col-sm-9">@Model.Summary.ObjectsScanned</dd>
-    <dt class="col-sm-3">Findings</dt><dd class="col-sm-9">@Model.Summary.FindingsCount</dd>
-    <dt class="col-sm-3">Errors</dt><dd class="col-sm-9">@Model.Summary.ErrorsCount</dd>
-    <dt class="col-sm-3">AD Security Score</dt><dd class="col-sm-9">@(Model.Summary.AdSecurityScore?.ToString() ?? "—")</dd>
+    <dt class="col-sm-3">Статус</dt><dd class="col-sm-9">@UiText.ScanStatus(Model.Summary.Status)</dd>
+    <dt class="col-sm-3">Начало (UTC)</dt><dd class="col-sm-9">@Model.Summary.StartedAtUtc.ToString("u")</dd>
+    <dt class="col-sm-3">Завершение (UTC)</dt><dd class="col-sm-9">@(Model.Summary.FinishedAtUtc?.ToString("u") ?? "—")</dd>
+    <dt class="col-sm-3">Длительность</dt><dd class="col-sm-9">@(Model.Summary.Duration?.ToString(@"hh\:mm\:ss") ?? "—")</dd>
+    <dt class="col-sm-3">Сервер</dt><dd class="col-sm-9">@Model.Summary.Server</dd>
+    <dt class="col-sm-3">Базовый DN</dt><dd class="col-sm-9">@Model.BaseDn</dd>
+    <dt class="col-sm-3">Проверено объектов</dt><dd class="col-sm-9">@Model.Summary.ObjectsScanned</dd>
+    <dt class="col-sm-3">Находок</dt><dd class="col-sm-9">@Model.Summary.FindingsCount</dd>
+    <dt class="col-sm-3">Ошибок</dt><dd class="col-sm-9">@Model.Summary.ErrorsCount</dd>
+    <dt class="col-sm-3">Оценка безопасности AD</dt><dd class="col-sm-9">@(Model.Summary.AdSecurityScore?.ToString() ?? "—")</dd>
 </dl>
 
-<h2 class="h4 mt-4">Severity summary</h2>
+<h2 class="h4 mt-4">Сводка по критичности</h2>
 <div class="table-responsive"><table class="table table-sm">
-    <thead><tr><th>Severity</th><th>Findings</th><th>Objects</th></tr></thead>
+    <thead><tr><th>Критичность</th><th>Находки</th><th>Объекты</th></tr></thead>
     <tbody>
     @foreach (var severity in Enum.GetValues<RiskSeverity>().Reverse())
     {
-        <tr><td>@severity</td><td>@Model.FindingSeverityCounts.GetValueOrDefault(severity)</td><td>@Model.ObjectRiskCounts.GetValueOrDefault(severity)</td></tr>
+        <tr><td>@UiText.Severity(severity)</td><td>@Model.FindingSeverityCounts.GetValueOrDefault(severity)</td><td>@Model.ObjectRiskCounts.GetValueOrDefault(severity)</td></tr>
     }
     </tbody>
 </table></div>
 
-<h2 class="h4 mt-4">Top risky accounts</h2>
+<h2 class="h4 mt-4">Учётные записи с наибольшим риском</h2>
 <div class="table-responsive"><table class="table table-sm">
-    <thead><tr><th>Object</th><th>Risk score</th><th>Risk level</th><th>Findings</th></tr></thead>
+    <thead><tr><th>Объект</th><th>Оценка риска</th><th>Уровень риска</th><th>Находки</th></tr></thead>
     <tbody>
     @foreach (var account in Model.TopRiskyAccounts)
     {
-        <tr><td><a asp-controller="ScanObjects" asp-action="Details" asp-route-scanId="@Model.Summary.Id" asp-route-objectGuid="@account.ObjectGuid">@account.Name</a></td><td>@account.RiskScore</td><td>@account.RiskLevel</td><td>@account.FindingsCount</td></tr>
+        <tr><td><a asp-controller="ScanObjects" asp-action="Details" asp-route-scanId="@Model.Summary.Id" asp-route-objectGuid="@account.ObjectGuid">@account.Name</a></td><td>@account.RiskScore</td><td>@UiText.Severity(account.RiskLevel)</td><td>@account.FindingsCount</td></tr>
     }
     </tbody>
 </table></div>
 
-<h2 class="h4 mt-4">Recent findings</h2>
+<h2 class="h4 mt-4">Последние находки</h2>
 <div class="table-responsive"><table class="table table-sm">
-    <thead><tr><th>Object</th><th>Rule ID</th><th>Severity</th><th>Title</th></tr></thead>
+    <thead><tr><th>Объект</th><th>Код правила</th><th>Критичность</th><th>Находка</th></tr></thead>
     <tbody>
     @foreach (var finding in Model.Findings)
     {
-        <tr><td><a asp-controller="ScanObjects" asp-action="Details" asp-route-scanId="@Model.Summary.Id" asp-route-objectGuid="@finding.ObjectGuid">@finding.ObjectName</a></td><td>@finding.RuleId</td><td>@finding.Severity</td><td>@finding.Title</td></tr>
+        <tr><td><a asp-controller="ScanObjects" asp-action="Details" asp-route-scanId="@Model.Summary.Id" asp-route-objectGuid="@finding.ObjectGuid">@finding.ObjectName</a></td><td>@finding.RuleId</td><td>@UiText.Severity(finding.Severity)</td><td>@UiText.FindingTitle(finding.RuleId, finding.Title)</td></tr>
     }
     </tbody>
 </table></div>

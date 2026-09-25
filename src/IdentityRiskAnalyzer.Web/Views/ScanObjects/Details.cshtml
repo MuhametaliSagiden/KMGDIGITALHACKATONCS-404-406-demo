@@ -1,8 +1,8 @@
 @using IdentityRiskAnalyzer.Web.Domain.Enums
 @model IdentityRiskAnalyzer.Web.ViewModels.AccountDetailsViewModel
 @{
-    ViewData["Title"] = $"Historical Account: {Model.AccountName}";
-    string StatusText(bool? value) => value switch { true => "Yes", false => "No", _ => "Unknown" };
+    ViewData["Title"] = $"Исторические данные: {Model.AccountName}";
+    string StatusText(bool? value) => value switch { true => "Да", false => "Нет", _ => "Неизвестно" };
     string SeverityClass(RiskSeverity severity) => severity switch
     {
         RiskSeverity.Critical => "text-bg-danger",
@@ -12,97 +12,97 @@
     };
     string DelegationName(DelegationType type) => type switch
     {
-        DelegationType.Unconstrained => "Unconstrained Delegation",
-        DelegationType.Constrained => "Constrained Delegation",
-        DelegationType.ProtocolTransition => "Protocol Transition",
-        DelegationType.ResourceBasedConstrained => "Resource-Based Constrained Delegation",
-        _ => type.ToString()
+        DelegationType.Unconstrained => "Неограниченное делегирование",
+        DelegationType.Constrained => "Ограниченное делегирование",
+        DelegationType.ProtocolTransition => "Переход протокола",
+        DelegationType.ResourceBasedConstrained => "Делегирование с ограничением на стороне ресурса",
+        _ => UiText.Translate(type.ToString())
     };
 }
 
-<nav aria-label="Breadcrumb" class="mb-3">
+<nav aria-label="Навигационная цепочка" class="mb-3">
     <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a asp-controller="Dashboard" asp-action="Index">Dashboard</a></li>
-        <li class="breadcrumb-item"><a asp-controller="Scans" asp-action="Details" asp-route-id="@Model.ScanRunId">Scan #@Model.ScanRunId</a></li>
+        <li class="breadcrumb-item"><a asp-controller="Dashboard" asp-action="Index">Обзор</a></li>
+        <li class="breadcrumb-item"><a asp-controller="Scans" asp-action="Details" asp-route-id="@Model.ScanRunId">Сканирование №@Model.ScanRunId</a></li>
         <li class="breadcrumb-item active" aria-current="page">@Model.AccountName</li>
     </ol>
 </nav>
 
 <div class="alert alert-info" role="status">
-    <strong>Historical snapshot from Scan #@Model.ScanRunId</strong> · @Model.ScanTimestampUtc.ToString("dd MMM yyyy HH:mm 'UTC'") · @Model.ScanStatus
-    <div class="small">This page shows saved results from that scan, not the current Active Directory state.</div>
+    <strong>Сохранённый снимок после сканирования №@Model.ScanRunId</strong> · @Model.ScanTimestampUtc.ToString("dd.MM.yyyy HH:mm 'UTC'") · @UiText.ScanStatus(Model.ScanStatus)
+    <div class="small">Здесь показаны сохранённые результаты того сканирования, а не текущее состояние Active Directory.</div>
 </div>
 
 <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
     <div>
         <h1 class="mb-1">@Model.AccountName</h1>
-        <div><strong>SAM Account Name:</strong> @(Model.SamAccountName ?? "Not available")</div>
-        <div><strong>UPN:</strong> @(Model.UserPrincipalName ?? "Not available")</div>
+        <div><strong>Имя учётной записи SAM:</strong> @(Model.SamAccountName ?? "Нет данных")</div>
+        <div><strong>UPN:</strong> @(Model.UserPrincipalName ?? "Нет данных")</div>
         <div class="text-muted text-break"><strong>DN:</strong> @Model.DistinguishedName</div>
     </div>
     <div class="card shadow-sm border-0 bg-light"><div class="card-body">
-        <div class="text-muted">Account Risk Score</div>
+        <div class="text-muted">Индивидуальная оценка риска</div>
         <div class="display-5 fw-bold">@Model.RiskScore <span class="fs-5 fw-normal">/ 100</span></div>
-        <span class="badge @SeverityClass(Model.RiskLevel)">@Model.RiskLevel</span>
+        <span class="badge @SeverityClass(Model.RiskLevel)">@UiText.Severity(Model.RiskLevel)</span>
     </div></div>
 </div>
 
 <div class="row g-3 mb-4">
     <div class="col-lg-4"><section class="card h-100"><div class="card-body">
-        <h2 class="h5">Account Status</h2>
+        <h2 class="h5">Состояние учётной записи</h2>
         <dl class="row mb-0">
-            <dt class="col-7">Enabled</dt><dd class="col-5">@StatusText(Model.Enabled)</dd>
-            <dt class="col-7">Locked</dt><dd class="col-5">@StatusText(Model.Locked)</dd>
-            <dt class="col-7">Expired</dt><dd class="col-5">@StatusText(Model.AccountExpired)</dd>
+            <dt class="col-7">Включена</dt><dd class="col-5">@StatusText(Model.Enabled)</dd>
+            <dt class="col-7">Заблокирована</dt><dd class="col-5">@StatusText(Model.Locked)</dd>
+            <dt class="col-7">Срок истёк</dt><dd class="col-5">@StatusText(Model.AccountExpired)</dd>
         </dl>
     </div></section></div>
     <div class="col-lg-4"><section class="card h-100"><div class="card-body">
-        <h2 class="h5">Activity &amp; Password</h2>
+        <h2 class="h5">Активность и пароль</h2>
         <dl class="mb-0">
-            <dt>Last known activity</dt><dd>@(Model.LastKnownActivityUtc?.ToString("yyyy-MM-dd HH:mm 'UTC'") ?? "Not available")</dd>
-            <dt>Password last set</dt><dd>@(Model.PasswordLastSetUtc?.ToString("yyyy-MM-dd HH:mm 'UTC'") ?? "Not available")</dd>
-            <dt>Password never expires</dt><dd>@StatusText(Model.PasswordNeverExpires)</dd>
+            <dt>Последняя известная активность</dt><dd>@(Model.LastKnownActivityUtc?.ToString("yyyy-MM-dd HH:mm 'UTC'") ?? "Нет данных")</dd>
+            <dt>Пароль установлен</dt><dd>@(Model.PasswordLastSetUtc?.ToString("yyyy-MM-dd HH:mm 'UTC'") ?? "Нет данных")</dd>
+            <dt>Срок действия пароля не ограничен</dt><dd>@StatusText(Model.PasswordNeverExpires)</dd>
         </dl>
     </div></section></div>
     <div class="col-lg-4"><section class="card h-100"><div class="card-body">
-        <h2 class="h5">Identity</h2>
+        <h2 class="h5">Идентификация</h2>
         <dl class="mb-0">
-            <dt>Object type</dt><dd>@Model.ObjectType</dd>
-            <dt>SID</dt><dd class="text-break">@(Model.Sid ?? "Not available")</dd>
-            <dt>Service Account</dt><dd>@(Model.IsServiceAccount ? "Yes" : "No")</dd>
-            <dt>Privileged</dt><dd>@(Model.IsPrivileged ? "Yes" : "No")</dd>
+            <dt>Тип объекта</dt><dd>@UiText.ObjectType(Model.ObjectType)</dd>
+            <dt>SID</dt><dd class="text-break">@(Model.Sid ?? "Нет данных")</dd>
+            <dt>Сервисная учётная запись</dt><dd>@(Model.IsServiceAccount ? "Да" : "Нет")</dd>
+            <dt>Привилегированная</dt><dd>@(Model.IsPrivileged ? "Да" : "Нет")</dd>
         </dl>
     </div></section></div>
 </div>
 
 <section class="card shadow-sm mb-4" aria-labelledby="breakdown-heading"><div class="card-body">
-    <h2 id="breakdown-heading" class="h4">Risk Score Breakdown</h2>
-    <p class="text-muted">Contributions come from findings saved in this ScanRun. The final Account Risk Score and Risk Level are the saved snapshot values.</p>
+    <h2 id="breakdown-heading" class="h4">Расчёт оценки риска</h2>
+    <p class="text-muted">Баллы начислены за находки, сохранённые в этом сканировании. Итоговая оценка риска и уровень риска взяты из сохранённого снимка.</p>
     @if (Model.FindingsCount > 0)
     {
         <div class="table-responsive"><table class="table table-sm">
-            <thead><tr><th>Rule ID</th><th>Finding</th><th>Contribution</th></tr></thead>
+            <thead><tr><th>Код правила</th><th>Находка</th><th>Баллы</th></tr></thead>
             <tbody>
             @foreach (var finding in Model.Findings)
             {
-                <tr><td>@finding.RuleId</td><td>@finding.Title</td><td>+@finding.ScoreContribution</td></tr>
+                <tr><td>@finding.RuleId</td><td>@UiText.FindingTitle(finding.RuleId, finding.Title)</td><td>+@finding.ScoreContribution</td></tr>
             }
             </tbody>
         </table></div>
     }
-    <div><strong>Accumulated points:</strong> @Model.AccumulatedPoints</div>
-    <div><strong>Final Account Risk Score:</strong> @Model.RiskScore / 100</div>
+    <div><strong>Накоплено баллов:</strong> @Model.AccumulatedPoints</div>
+    <div><strong>Итоговая оценка риска:</strong> @Model.RiskScore / 100</div>
     @if (Model.WasCapped)
     {
-        <div class="text-muted">Accumulated points exceed 100; scoring caps the result at 100. The final value above is the saved historical score.</div>
+        <div class="text-muted">Сумма баллов превышает 100, поэтому оценка ограничена этим значением. Выше показан сохранённый результат сканирования.</div>
     }
 </div></section>
 
 <section class="card shadow-sm mb-4" aria-labelledby="privilege-heading"><div class="card-body">
-    <h2 id="privilege-heading" class="h4">Privileged Memberships</h2>
+    <h2 id="privilege-heading" class="h4">Привилегированное членство</h2>
     @if (Model.PrivilegeMemberships.Count == 0)
     {
-        <p class="text-muted mb-0">No privileged group memberships were recorded for this object in this scan.</p>
+        <p class="text-muted mb-0">В этом сканировании привилегированное членство объекта не зафиксировано.</p>
     }
     else
     {
@@ -110,19 +110,19 @@
         {
             <div class="border rounded p-3 mb-3">
                 <h3 class="h5">@membership.GroupName</h3>
-                <div><strong>Type:</strong> @(membership.IsDirect ? "Direct membership" : "Nested membership")</div>
-                <div><strong>Depth:</strong> @membership.Depth</div>
-                <div class="mt-2"><strong>Privilege path:</strong><br /><partial name="_MembershipPath" model="membership" /></div>
+                <div><strong>Тип:</strong> @(membership.IsDirect ? "Прямое членство" : "Вложенное членство")</div>
+                <div><strong>Глубина:</strong> @membership.Depth</div>
+                <div class="mt-2"><strong>Цепочка привилегий:</strong><br /><partial name="_MembershipPath" model="membership" /></div>
             </div>
         }
     }
 </div></section>
 
 <section class="card shadow-sm mb-4" aria-labelledby="delegation-heading"><div class="card-body">
-    <h2 id="delegation-heading" class="h4">Kerberos Delegation</h2>
+    <h2 id="delegation-heading" class="h4">Делегирование Kerberos</h2>
     @if (Model.DelegationRecords.Count == 0)
     {
-        <p class="text-muted mb-0">No Kerberos delegation configuration was recorded for this object in this scan.</p>
+        <p class="text-muted mb-0">В этом сканировании конфигурация делегирования Kerberos для объекта не зафиксирована.</p>
     }
     else
     {
@@ -132,20 +132,20 @@
                 <h3 class="h5">@DelegationName(delegation.DelegationType)</h3>
                 @if (!delegation.TargetsAvailable)
                 {
-                    <p class="text-warning mb-0">Target data could not be parsed.</p>
+                    <p class="text-warning mb-0">Не удалось разобрать сведения о целевых службах.</p>
                 }
                 else if (delegation.Targets.Count == 0)
                 {
-                    <p class="text-muted mb-0">Targets: Not recorded or not applicable.</p>
+                    <p class="text-muted mb-0">Целевые службы не записаны или не применимы.</p>
                 }
                 else
                 {
-                    <div><strong>Targets:</strong></div>
+                    <div><strong>Целевые службы:</strong></div>
                     <ul class="mb-0">@foreach (var target in delegation.Targets) { <li class="text-break">@target</li> }</ul>
                 }
                 @if (delegation.DelegationType == DelegationType.ResourceBasedConstrained)
                 {
-                    <p class="small text-muted mt-2 mb-0">Detailed ACL analysis was not performed in this MVP.</p>
+                    <p class="small text-muted mt-2 mb-0">Подробный анализ ACL в этой версии не выполнялся.</p>
                 }
             </div>
         }
@@ -153,10 +153,10 @@
 </div></section>
 
 <section class="card shadow-sm mb-4" aria-labelledby="findings-heading"><div class="card-body">
-    <h2 id="findings-heading" class="h4">Risk Findings <span class="text-muted fs-6">(@Model.FindingsCount)</span></h2>
+    <h2 id="findings-heading" class="h4">Находки по рискам <span class="text-muted fs-6">(@Model.FindingsCount)</span></h2>
     @if (Model.FindingsCount == 0)
     {
-        <p class="text-muted mb-0">No risks were detected by the rules enabled for this scan.</p>
+        <p class="text-muted mb-0">Правила, включённые для этого сканирования, не обнаружили рисков.</p>
     }
     else
     {
@@ -164,38 +164,38 @@
         {
             <article class="border rounded p-3 mb-3">
                 <div class="d-flex flex-wrap gap-2 align-items-center mb-2">
-                    <span class="badge @SeverityClass(finding.Severity)">@finding.Severity</span>
+                    <span class="badge @SeverityClass(finding.Severity)">@UiText.Severity(finding.Severity)</span>
                     <span class="font-monospace">@finding.RuleId</span>
-                    <span class="text-muted">@finding.Category</span>
-                    <span class="ms-auto">Risk points: @finding.RiskPoints</span>
+                    <span class="text-muted">@UiText.Category(finding.Category)</span>
+                    <span class="ms-auto">Баллы риска: @finding.RiskPoints</span>
                 </div>
-                <h3 class="h5">@finding.Title</h3>
-                <p>@finding.Description</p>
-                <h4 class="h6">Evidence</h4>
-                <p class="text-break" style="white-space: pre-wrap">@(finding.Evidence ?? "No evidence text was saved.")</p>
-                <div class="bg-light rounded p-2"><strong>Recommended action</strong><div class="text-break" style="white-space: pre-wrap">@finding.Recommendation</div></div>
+                <h3 class="h5">@UiText.FindingTitle(finding.RuleId, finding.Title)</h3>
+                <p>@UiText.FindingDescription(finding.RuleId, finding.Description)</p>
+                <h4 class="h6">Доказательства</h4>
+                <p class="text-break" style="white-space: pre-wrap">@UiText.Evidence(finding.Evidence)</p>
+                <div class="bg-light rounded p-2"><strong>Рекомендуемое действие</strong><div class="text-break" style="white-space: pre-wrap">@UiText.FindingRecommendation(finding.RuleId, finding.Recommendation)</div></div>
             </article>
         }
     }
 </div></section>
 
 <section class="card shadow-sm mb-4" aria-labelledby="memberships-heading"><div class="card-body">
-    <h2 id="memberships-heading" class="h4">Group Memberships <span class="text-muted fs-6">(@Model.GroupMembershipCount)</span></h2>
-    <p class="text-muted">Direct and nested memberships saved in this scan, including privileged groups. Page @Model.MembershipPage of @Model.MembershipPageCount.</p>
+    <h2 id="memberships-heading" class="h4">Членство в группах <span class="text-muted fs-6">(@Model.GroupMembershipCount)</span></h2>
+    <p class="text-muted">Прямое и вложенное членство, сохранённое в этом сканировании, включая привилегированные группы. Страница @Model.MembershipPage из @Model.MembershipPageCount.</p>
     @if (Model.GroupMembershipCount == 0)
     {
-        <p class="text-muted mb-0">No group memberships were recorded for this object in this scan.</p>
+        <p class="text-muted mb-0">В этом сканировании членство объекта в группах не зафиксировано.</p>
     }
     else
     {
         <div class="table-responsive"><table class="table table-striped table-sm align-middle">
-            <thead><tr><th>Group</th><th>Type</th><th>Depth</th><th>Path</th></tr></thead>
+            <thead><tr><th>Группа</th><th>Тип</th><th>Глубина</th><th>Цепочка</th></tr></thead>
             <tbody>
             @foreach (var membership in Model.GroupMemberships)
             {
                 <tr>
-                    <td>@membership.GroupName @if (membership.IsPrivileged) { <span class="badge text-bg-warning">Privileged</span> }</td>
-                    <td>@(membership.IsDirect ? "Direct" : "Nested")</td>
+                    <td>@membership.GroupName @if (membership.IsPrivileged) { <span class="badge text-bg-warning">Привилегированная</span> }</td>
+                    <td>@(membership.IsDirect ? "Прямое" : "Вложенное")</td>
                     <td>@membership.Depth</td>
                     <td><partial name="_MembershipPath" model="membership" /></td>
                 </tr>
@@ -204,14 +204,14 @@
         </table></div>
         @if (Model.MembershipPageCount > 1)
         {
-            <nav aria-label="Group membership pages" class="d-flex gap-2">
+            <nav aria-label="Страницы членства в группах" class="d-flex gap-2">
                 @if (Model.MembershipPage > 1)
                 {
-                    <a class="btn btn-outline-secondary btn-sm" asp-controller="ScanObjects" asp-action="Details" asp-route-scanId="@Model.ScanRunId" asp-route-objectGuid="@Model.ObjectGuid" asp-route-page="@(Model.MembershipPage - 1)">Previous</a>
+                    <a class="btn btn-outline-secondary btn-sm" asp-controller="ScanObjects" asp-action="Details" asp-route-scanId="@Model.ScanRunId" asp-route-objectGuid="@Model.ObjectGuid" asp-route-page="@(Model.MembershipPage - 1)">Назад</a>
                 }
                 @if (Model.MembershipPage < Model.MembershipPageCount)
                 {
-                    <a class="btn btn-outline-secondary btn-sm" asp-controller="ScanObjects" asp-action="Details" asp-route-scanId="@Model.ScanRunId" asp-route-objectGuid="@Model.ObjectGuid" asp-route-page="@(Model.MembershipPage + 1)">Next</a>
+                    <a class="btn btn-outline-secondary btn-sm" asp-controller="ScanObjects" asp-action="Details" asp-route-scanId="@Model.ScanRunId" asp-route-objectGuid="@Model.ObjectGuid" asp-route-page="@(Model.MembershipPage + 1)">Далее</a>
                 }
             </nav>
         }
